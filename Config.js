@@ -6,6 +6,7 @@ var cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const xss = require("xss-clean");
 const mongoose = require("mongoose");
+const { updateTimer } = require("./Controller/timerController");
 require("dotenv").config();
 
 // const uri = 'mongodb+srv://susalabs:susalabs@cluster0.xn0yck9.mongodb.net/?retryWrites=true&w=majority';

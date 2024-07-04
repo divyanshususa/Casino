@@ -4,7 +4,6 @@ const User = require("../Schema/user");
 
 exports.placebet = async (req, res) => {
   const { userId, table, numbers, amount } = req.body;
-
   try {
     const user = await User.findById(userId);
 

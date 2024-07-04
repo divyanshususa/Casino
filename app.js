@@ -27,15 +27,18 @@ const spinnerRoute = require("./Routes/spinnerRoutes");
 const authenticate = require("./Middlewares/authenticate");
 const adminAuth = require("./Middlewares/adminAuthentication");
 const adminRoute = require("./Routes/adminRoutes");
-const timerController = require("./Controller/timerController");
+const { updateTimer } = require("./Controller/updateTimer");
 const port = process.env.PORT || 5000;
 
 try {
   mongoconnect
     .connectToDatabase()
     .then(() => {
-      app.listen(port, () =>
+      app.listen(port, () => {
         console.log(`Server is up and running at ${port}`)
+        updateTimer();
+        // timerController.updateTimer();
+      }
       );
     })
     .catch((err) => {

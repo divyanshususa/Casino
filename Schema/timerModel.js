@@ -1,21 +1,13 @@
-// models/timerModel.js
+const mongoose = require('mongoose');
 
-class TimerModel {
-  constructor() {
-    this.countdownTime = 2 * 60 + 10; // 2 minutes and 10 seconds
-    this.remainingTime = this.countdownTime;
-  }
+// Define schema for spinner history
+const TimerSchema = new mongoose.Schema({
+  remainingTime: {
+    type: Number
+  },
+});
 
-  updateRemainingTime() {
-    this.remainingTime -= 1;
-    if (this.remainingTime <= 0) {
-      this.remainingTime = this.countdownTime; // Reset timer
-    }
-  }
+// Create a model for spinner history
+const TimerModel = mongoose.model('TimerModel', TimerSchema);
 
-  getRemainingTime() {
-    return this.remainingTime;
-  }
-}
-
-module.exports = new TimerModel();
+module.exports = TimerModel

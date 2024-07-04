@@ -1,75 +1,74 @@
 const mongoose = require('mongoose')
 
 const userSchema = new mongoose.Schema({
-   username:{
+  username: {
     type: String,
     required: true
-   },
-   password:{
-    type:String,
-    required:true
-   },
-   phone:{
-    type:Number,
-    required:true
-   },
-
-   firstname:{
+  },
+  password: {
     type: String,
-    required:false
-   },
-   lastname:{
-    type: String,
-    required:false
-   },
-   gender:{
-      type:String,
-      required: false
-   },
+    required: true
+  },
+  phone: {
+    type: Number,
+    required: true
+  },
 
-   userpoints:{
-    type:Number,
+  firstname: {
+    type: String,
     required: false
-   },
+  },
+  lastname: {
+    type: String,
+    required: false
+  },
+  gender: {
+    type: String,
+    required: false
+  },
+
+  userpoints: {
+    type: Number,
+    required: false
+  },
 
 
-   amountWin:{
-      type:Number,
-      required:false
-   },
-   
-isAdmin:{
-   type:Boolean,
-   default:false
-},
+  amountWin: {
+    type: Number,
+    required: false
+  },
 
-   bets: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Bet'
-    }],
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
 
-    gamesPlayed: {
-      type: Number,
-      default: 0
-    },
-    gamesLost: {
-      type: Number,
-      default: 0
-    },
+  bets: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Bet'
+  }],
 
-    totalAmountWon: {
-      type: Number,
-      default: 0
-    }
-    ,
-    transactions: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Transaction'
-    }],
-  },{timestamps:true});
+  gamesPlayed: {
+    type: Number,
+    default: 0
+  },
+  gamesLost: {
+    type: Number,
+    default: 0
+  },
 
-  
-  const User = mongoose.model("User", userSchema);
-  
-  module.exports = User;
-  
+  totalAmountWon: {
+    type: Number,
+    default: 0
+  }
+  ,
+  transactions: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Transaction'
+  }],
+}, { timestamps: true });
+
+
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;
