@@ -27,7 +27,7 @@ const spinnerRoute = require("./Routes/spinnerRoutes");
 const authenticate = require("./Middlewares/authenticate");
 const adminAuth = require("./Middlewares/adminAuthentication");
 const adminRoute = require("./Routes/adminRoutes");
-// const { updateTimer } = require("./Controller/updateTimer");
+
 const port = process.env.PORT || 5000;
 
 try {
@@ -35,11 +35,10 @@ try {
     .connectToDatabase()
     .then(() => {
       app.listen(port, () => {
-        console.log(`Server is up and running at ${port}`)
+        console.log(`Server is up and running at ${port}`);
         // updateTimer();
         // timerController.updateTimer();
-      }
-      );
+      });
     })
     .catch((err) => {
       console.log(err);
