@@ -7,7 +7,7 @@ exports.GlobalTimer = async (req, res) => {
     const timerDoc = await TimerModel.findById("668513f12d91a3f5ae56e44f");
     const remainingTime = timerDoc ? timerDoc.remainingTime : 131;
     // Calculate remaining time in minutes and seconds for JSON output
-    const minutes = Math.floor(remainingTime / 131);
+    const minutes = Math.floor(remainingTime / 60);
     const seconds = remainingTime % 60;
     const response = {
       remainingTime: `${minutes}:${seconds.toString().padStart(2, "0")}`,
