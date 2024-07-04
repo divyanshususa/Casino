@@ -1,7 +1,8 @@
 const express = require("express");
 const TimerModel = require("../Schema/timerModel"); // Adjust the path as needed
 
-let remainingTime = 131;
+llet remainingTime = 131;
+let intervalId = null;
 
 const updateTimer = async () => {
   try {
@@ -16,11 +17,18 @@ const updateTimer = async () => {
       { $set: { remainingTime } },
       { upsert: true }
     );
-    setTimeout(updateTimer, 1000); // Update every second
   } catch (error) {
     console.error("Error updating timer:", error);
   }
 };
+
+// Start the timer on server startup
+intervalId = setInterval(updateTimer, 1000);
+
+// Don't forget to clear the interval when the server is shut down
+process.on('exit', () => {
+  clearInterval(intervalId);
+});
 
 exports.GlobalTimer = async (req, res) => {
   try {
