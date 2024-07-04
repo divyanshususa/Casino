@@ -7,7 +7,7 @@ const updateTimer = async () => {
         let remainingTime = timerDoc ? timerDoc.remainingTime : 131;
         remainingTime--;
         if (remainingTime < 0) {
-            remainingTime = 131;
+            remainingTime = 60;
         }
         await TimerModel.updateOne(
             { _id: "668513f12d91a3f5ae56e44f" },
