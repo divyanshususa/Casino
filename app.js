@@ -27,7 +27,7 @@ const spinnerRoute = require("./Routes/spinnerRoutes");
 const authenticate = require("./Middlewares/authenticate");
 const adminAuth = require("./Middlewares/adminAuthentication");
 const adminRoute = require("./Routes/adminRoutes");
-const { updateTimer } = require("./Controller/updateTimer");
+// const { updateTimer } = require("./Controller/updateTimer");
 const port = process.env.PORT || 5000;
 
 try {
@@ -36,7 +36,7 @@ try {
     .then(() => {
       app.listen(port, () => {
         console.log(`Server is up and running at ${port}`)
-        updateTimer();
+        // updateTimer();
         // timerController.updateTimer();
       }
       );
