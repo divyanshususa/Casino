@@ -53,7 +53,9 @@ exports.spinner = async (req, res) => {
         ...spinnerResult,
       });
 
-      await spinnerHistory.save();
+      ///updated code to remvoe/hold updatin 
+      
+      // await spinnerHistory.save();
 
       return res.json(spinnerResult);
     }
