@@ -55,7 +55,7 @@ exports.spinner = async (req, res) => {
 
       ///updated code to remvoe/hold updatin 
 
-      await spinnerHistory.save();
+      // await spinnerHistory.save();
 
       return res.json(spinnerResult);
     }
