@@ -1,7 +1,6 @@
 let spinnerResult = null;
 const betSchema = require('../Schema/bet'); // Adjust the path as needed
 const SpinnerHistory = require('../Schema/spinner'); // Adjust the path as needed
-
 exports.spinner = async (req, res) => {
   try {
     const bets = await betSchema.find({ checked: false }).populate("userId");
@@ -41,12 +40,17 @@ exports.spinner = async (req, res) => {
 
     // If no bets found at all, generate random numbers
     if (!baseCriterion) {
-      const tripleNumber = 999;
+      const tripleNumber = Math.floor(Math.random() * 900) + 100;
       const tens = Math.floor((tripleNumber % 100) / 10);
       const singleNumber = tripleNumber % 10;
       const doubleNumber = tens * 10 + singleNumber;
 
-      const spinnerResult = { singleNumber, doubleNumber, tripleNumber };
+      // Replace any zeros in the number with 1
+      const spinnerResult = {
+        singleNumber: replaceZeroWithOne(singleNumber),
+        doubleNumber: replaceZeroWithOne(doubleNumber),
+        tripleNumber: replaceZeroWithOne(tripleNumber)
+      };
 
       const spinnerHistory = new SpinnerHistory({
         userId: null, // or assign a specific userId if needed
@@ -79,7 +83,12 @@ exports.spinner = async (req, res) => {
     const tens = Math.floor((tripleNumber % 100) / 10);
     const doubleNumber = tens * 10 + singleNumber;
 
-    const spinnerResult = { singleNumber, doubleNumber, tripleNumber };
+    // Replace zeros with 1
+    const spinnerResult = {
+      singleNumber: replaceZeroWithOne(singleNumber),
+      doubleNumber: replaceZeroWithOne(doubleNumber),
+      tripleNumber: replaceZeroWithOne(tripleNumber)
+    };
 
     const spinnerHistory = new SpinnerHistory({
       userId: null, // or assign a specific userId if needed
@@ -93,6 +102,16 @@ exports.spinner = async (req, res) => {
     console.log("Error: ", error);
     res.status(500).json({ error: error.message });
   }
+};
+
+// Helper function to replace 0 with 1 in a number
+const replaceZeroWithOne = (num) => {
+  // Convert the number to a string to check for zero digits
+  let numStr = num.toString();
+  // Replace any '0' with '1'
+  numStr = numStr.replace(/0/g, '1');
+  // Convert back to an integer
+  return parseInt(numStr);
 };
 
 
