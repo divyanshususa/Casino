@@ -1,26 +1,11 @@
 const mongoose = require('mongoose');
 
-// Define schema for spinner history
-const SpinnerHistorySchema = new mongoose.Schema({
-  singleNumber: {
-    type: Number,
-    required: true
-  },
-  doubleNumber: {
-    type: Number,
-    required: true
-  },
-  tripleNumber: {
-    type: Number,
-    required: true
-  },
-  timestamp: {
-    type: Date,
-    default: Date.now
-  }
+const spinnerSchema = new mongoose.Schema({
+  singleNumber: { type: Number, required: true },
+  doubleNumber: { type: Number, required: true },
+  tripleNumber: { type: Number, required: true },
+  global: { type: Boolean, default: false }, // Indicates if this is a global result
+  timestamp: { type: Date, default: Date.now },
 });
 
-// Create a model for spinner history
-const SpinnerHistory = mongoose.model('SpinnerHistory', SpinnerHistorySchema);
-
-module.exports= SpinnerHistory
+module.exports = mongoose.model('SpinnerHistory', spinnerSchema);

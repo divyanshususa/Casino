@@ -1,154 +1,76 @@
-let spinnerResult = null;
-const betSchema = require('../Schema/bet'); // Adjust the path as needed
 const SpinnerHistory = require('../Schema/spinner'); // Adjust the path as needed
+
+// Function to replace '0' with '1' in a number
+const replaceZeroWithOne = (num) => {
+  return parseInt(num.toString().replace(/0/g, '1'));
+};
+
+// Spinner endpoint: Generates or retrieves global spinner numbers
 exports.spinner = async (req, res) => {
   try {
-    const bets = await betSchema.find({ checked: false }).populate("userId");
+    // Check if a spinner result exists within the last minute
+    const latestEntry = await SpinnerHistory.findOne().sort({ timestamp: -1 });
 
-    let baseCriterion = null;
-    const freqCount = {};
-    const allNumbers = [];
-    const tripleNumbers = [];
+    let spinnerResult;
+    const now = new Date();
 
-    // Step 1: Check if there's a "triple" table in the bets
-    for (const bet of bets) {
-      if (bet.table === "triple") {
-        baseCriterion = "triple";
-        tripleNumbers.push(...bet.number);
-      }
-    }
-
-    // If no "triple" table, check for "double"
-    if (!baseCriterion) {
-      for (const bet of bets) {
-        if (bet.table === "double") {
-          baseCriterion = "double";
-          allNumbers.push(...bet.number);
-        }
-      }
-    }
-
-    // If no "double" table, check for "single"
-    if (!baseCriterion) {
-      for (const bet of bets) {
-        if (bet.table === "single") {
-          baseCriterion = "single";
-          allNumbers.push(...bet.number);
-        }
-      }
-    }
-
-    // If no bets found at all, generate random numbers
-    if (!baseCriterion) {
-      const tripleNumber = Math.floor(Math.random() * 900) + 100;
-      const tens = Math.floor((tripleNumber % 100) / 10);
-      const singleNumber = tripleNumber % 10;
-      const doubleNumber = tens * 10 + singleNumber;
-
-      // Replace any zeros in the number with 1
-      const spinnerResult = {
-        singleNumber: replaceZeroWithOne(singleNumber),
-        doubleNumber: replaceZeroWithOne(doubleNumber),
-        tripleNumber: replaceZeroWithOne(tripleNumber)
+    if (latestEntry && (now - latestEntry.timestamp) < 60000) {
+      // If the numbers were generated within the last minute, reuse them
+      spinnerResult = {
+        singleNumber: latestEntry.singleNumber,
+        doubleNumber: latestEntry.doubleNumber,
+        tripleNumber: latestEntry.tripleNumber,
       };
+    } else {
+      // Generate new random numbers if no recent result exists
+      const tripleNumber = replaceZeroWithOne(Math.floor(Math.random() * 900) + 100); // Random number (100-999)
+      const singleNumber = replaceZeroWithOne(tripleNumber % 10); // Extract last digit
+      const tens = Math.floor((tripleNumber % 100) / 10); // Tens digit
+      const doubleNumber = replaceZeroWithOne(tens * 10 + singleNumber); // Last two digits
 
+      spinnerResult = { singleNumber, doubleNumber, tripleNumber };
+
+      // Save the new global spinner result in the database
       const spinnerHistory = new SpinnerHistory({
-        userId: null, // or assign a specific userId if needed
         ...spinnerResult,
+        global: true, // Mark this entry as a global result
+        timestamp: new Date(),
       });
-
       await spinnerHistory.save();
-
-      return res.json(spinnerResult);
     }
 
-    // Step 2: Calculate the frequency count of numbers in the baseCriterion
-    const numbersToCheck = baseCriterion === "triple" ? tripleNumbers : allNumbers;
-    for (const num of numbersToCheck) {
-      freqCount[num] = (freqCount[num] || 0) + 1;
-    }
+    console.log('Generated/Shared Global Spinner Result:', spinnerResult);
 
-    // Find the numbers with the minimum frequency count
-    const minFrequency = Math.min(...Object.values(freqCount));
-    const leastFrequentNumbers = Object.keys(freqCount).filter(
-      (num) => freqCount[num] === minFrequency
-    );
-
-    // Choose the maximum number among the least frequent numbers if there's a tie
-    const chosenNumber = Math.max(...leastFrequentNumbers.map(Number));
-
-    // Step 3: Extract single number, double number from the chosen number
-    const tripleNumber = parseInt(chosenNumber);
-    const singleNumber = tripleNumber % 10;
-    const tens = Math.floor((tripleNumber % 100) / 10);
-    const doubleNumber = tens * 10 + singleNumber;
-
-    // Replace zeros with 1
-    const spinnerResult = {
-      singleNumber: replaceZeroWithOne(singleNumber),
-      doubleNumber: replaceZeroWithOne(doubleNumber),
-      tripleNumber: replaceZeroWithOne(tripleNumber)
-    };
-
-    const spinnerHistory = new SpinnerHistory({
-      userId: null, // or assign a specific userId if needed
-      ...spinnerResult,
-    });
-
-    await spinnerHistory.save();
-
+    // Respond with the shared global result
     res.json(spinnerResult);
   } catch (error) {
-    console.log("Error: ", error);
+    console.error('Error in Spinner Endpoint:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
-// Helper function to replace 0 with 1 in a number
-const replaceZeroWithOne = (num) => {
-  // Convert the number to a string to check for zero digits
-  let numStr = num.toString();
-  // Replace any '0' with '1'
-  numStr = numStr.replace(/0/g, '1');
-  // Convert back to an integer
-  return parseInt(numStr);
-};
-
-
-exports.getSingleNumberHistory = async (req, res) => {
+// Get last 5 global spinner results
+exports.getSpinnerHistory = async (req, res) => {
   try {
-    // Retrieve the last 5 spinner history documents for singleNumber
-    const singleNumberHistory = await SpinnerHistory.find().sort({ timestamp: -1 }).limit(5);
+    // Fetch the last 5 global spinner history documents
+    const spinnerHistory = await SpinnerHistory.find({ global: true })
+      .sort({ timestamp: -1 }) // Sort by latest timestamp
+      .limit(5); // Limit to the last 5 entries
 
-    res.json(singleNumberHistory);
+    // Map the history records to include required fields
+    const result = spinnerHistory.map((entry) => ({
+      _id: entry._id, // MongoDB document ID
+      singleNumber: entry.singleNumber, // Single number
+      doubleNumber: entry.doubleNumber, // Double number
+      tripleNumber: entry.tripleNumber, // Triple number
+      timestamp: entry.timestamp, // Timestamp of the record
+      __v: entry.__v, // Version key from MongoDB
+    }));
+
+    // Respond with the mapped result
+    res.json(result);
   } catch (error) {
-    console.error('Error fetching singleNumber history:', error);
+    console.error('Error fetching global spinner history:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
-exports.getDoubleNumberHistory = async (req, res) => {
-  try {
-    // Retrieve the last 5 spinner history documents for doubleNumber
-    const doubleNumberHistory = await SpinnerHistory.find().sort({ timestamp: -1 }).limit(5);
-
-    res.json(doubleNumberHistory);
-  } catch (error) {
-    console.error('Error fetching doubleNumber history:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
-
-exports.getTripleNumberHistory = async (req, res) => {
-  try {
-    // Retrieve the last 5 spinner history documents for tripleNumber
-    const tripleNumberHistory = await SpinnerHistory.find().sort({ timestamp: -1 }).limit(5);
-
-    res.json(tripleNumberHistory);
-  } catch (error) {
-    console.error('Error fetching tripleNumber history:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
-
-
